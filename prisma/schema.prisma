@@ -1,0 +1,44 @@
+// This is your Prisma schema file, // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// * Schemas
+model Reactions {
+  id       String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId   Int
+  reaction ReactionsEnum
+  postId   String        @db.ObjectId
+  post     Post          @relation(fields: [postId], references: [id])
+}
+
+model Commentary {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  Int
+  content String
+  postId  String @db.ObjectId
+  post    Post   @relation(fields: [postId], references: [id])
+}
+
+model Post {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId     Int
+  content    String
+  Commentary Commentary[]
+  Reactions  Reactions[]
+}
+
+enum ReactionsEnum {
+  LIKE
+  LOVE
+  WOW
+  SAD
+  ANGRY
+}
