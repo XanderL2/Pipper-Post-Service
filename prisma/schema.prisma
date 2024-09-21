@@ -31,7 +31,8 @@ model Post {
   id         String       @id @default(auto()) @map("_id") @db.ObjectId
   userId     Int
   content    String
-  Commentary Commentary[]
+  cratetedAt DateTime     @default(now())
+  commentary Commentary[]
   Reactions  Reactions[]
 }
 
@@ -41,4 +42,5 @@ enum ReactionsEnum {
   WOW
   SAD
   ANGRY
+  BASED
 }
