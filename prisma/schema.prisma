@@ -10,30 +10,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 // * Schemas
-model Reactions {
-  id       String        @id @default(auto()) @map("_id") @db.ObjectId
-  userId   Int
-  reaction ReactionsEnum
-  postId   String        @db.ObjectId
-  post     Post          @relation(fields: [postId], references: [id])
-}
-
-model Commentary {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  userId  Int
-  content String
-  postId  String @db.ObjectId
-  post    Post   @relation(fields: [postId], references: [id])
-}
-
 model Post {
-  id         String       @id @default(auto()) @map("_id") @db.ObjectId
-  userId     Int
-  content    String
-  cratetedAt DateTime     @default(now())
-  commentary Commentary[]
-  Reactions  Reactions[]
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    Int
+
+  content   String
+  createdAt DateTime @default(now())
+
+  //? Related to: 
+  PostReactions PostReactions[]
+  Comentary     Comentary[]
+}
+
+model PostReactions {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId    Int
+  postId    String        @db.ObjectId
+
+  reaction  ReactionsEnum
+  createdAt DateTime      @default(now())
+
+  //? Relations
+  post Post @relation(fields: [postId], references: [id])
+}
+
+model Comentary {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+  postId    String   @db.ObjectId
+
+  //? Relations
+  post               Post                 @relation(fields: [postId], references: [id])
+  ComentaryReactions ComentaryReactions[]
+  Replies            Replies[]
+}
+
+model ComentaryReactions {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId       Int
+  reaction     ReactionsEnum
+  createdAt    DateTime      @default(now())
+  commentaryId String        @db.ObjectId
+
+  //? Relations
+  commentary Comentary @relation(fields: [commentaryId], references: [id])
+}
+
+model Replies {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       Int
+  content      String
+  createdAt    DateTime @default(now())
+  commentaryId String   @db.ObjectId
+
+  //? Relations
+  comentary Comentary @relation(fields: [commentaryId], references: [id])
 }
 
 enum ReactionsEnum {

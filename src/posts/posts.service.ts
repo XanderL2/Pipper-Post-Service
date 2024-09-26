@@ -2,7 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Post, Prisma, PostReactions } from '@prisma/client';
+import { Reactions } from 'src/common/enums/reactions.enum';
 
 @Injectable()
 export class PostsService {
@@ -24,7 +25,6 @@ export class PostsService {
         }
       })
 
-
       return results;
 
     } catch (error) {
@@ -40,44 +40,38 @@ export class PostsService {
 
 
   async findHomePosts(page: number, limit: number) {
-
     const offset: number = (page - 1) * limit;
 
-    const results = await this.prismaService.post.findMany({
-      orderBy: { cratetedAt: 'desc' },
+    const posts = await this.prismaService.post.findMany({
+      orderBy: { createdAt: 'desc' },
       skip: offset,
       take: limit
     });
 
+    if (posts.length <= 0) throw new HttpException('Results not found', HttpStatus.NOT_FOUND)
 
-    if (results.length <= 0) throw new HttpException('Results not found', HttpStatus.NOT_FOUND)
-
-    return results
-
+    const groupedReactions = await this.getGropedReactionsByPost(posts);
+    return  this.mapPostsWithReactionCounts(groupedReactions, posts)
   }
 
-
-  //* FindPostsByUserId :id
   async findPostsByUserId(userId: number, page: number, limit: number) {
 
     const offset: number = (page - 1) * limit;
 
     const results = await this.prismaService.post.findMany({
-      where: { userId: userId},
-      orderBy: { cratetedAt: 'desc' },
+      where: { userId: userId },
+      orderBy: { createdAt: 'desc' },
       skip: offset,
       take: limit
     });
 
-
     if (results.length <= 0) throw new HttpException('Results not found', HttpStatus.NOT_FOUND)
 
-    return results
-
+    const groupedReactions = await this.getGropedReactionsByPost(results);
+    return  this.mapPostsWithReactionCounts(groupedReactions, results)
   }
 
 
-  //* Find One Post
   async findOnePost(postId: string) {
 
     const results = await this.prismaService.post.findUnique({
@@ -90,7 +84,6 @@ export class PostsService {
   }
 
 
-  //* Update Posts
   async updatePost(postid: string, data: UpdatePostDto) {
 
     try {
@@ -126,6 +119,67 @@ export class PostsService {
   }
 
 
+  //!PRIVATE METHODS
+
+  private async getPostsWithReactions(offset: number, limit: number) {
+    const posts = await this.prismaService.post.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip: offset,
+      take: limit
+    });
+
+    if (posts.length <= 0) return [];
+
+    const groupedReactions = await this.getGropedReactionsByPost(posts);
+    return this.mapPostsWithReactionCounts(groupedReactions, posts)
+
+  }
+
+
+  private async getGropedReactionsByPost(posts: Post[]) {
+    const reactionsGroupedByPost = await this.prismaService.postReactions.groupBy({
+      by: ['postId', 'reaction'],
+      _count: {
+        reaction: true,
+      },
+      where: {
+        postId: {
+          in: posts.map(post => post.id),
+        },
+      },
+    });
+
+    return reactionsGroupedByPost;
+  }
+
+
+  private mapPostsWithReactionCounts(groupedReactions, posts: Post[]) {
+
+    const countReactionByType = (reactionType: string) => {
+      const foundReaction = groupedReactions.find((reaction) => reaction.reaction === reactionType);
+
+      return foundReaction ? foundReaction._count.reaction : 0;
+    };
+
+    return posts.map((post: Post) => {
+      if (!groupedReactions.some(reaction => reaction.postId === post.id)) {
+        return { ...post, reactions: null };
+      }
+
+      return {
+        ...post,
+        reactions: {
+          LIKE: countReactionByType('LIKE'),
+          LOVE: countReactionByType('LOVE'),
+          WOW: countReactionByType('WOW'),
+          SAD: countReactionByType('SAD'),
+          ANGRY: countReactionByType('ANGRY'),
+          BASED: countReactionByType('BASED'),
+        },
+      };
+    });
+  }
+
 
   private handleDbError(error: Prisma.PrismaClientKnownRequestError) {
     if (error.code === 'P2025') {
@@ -140,6 +194,5 @@ export class PostsService {
 
     throw new HttpException('An error has occurred during editing', HttpStatus.INTERNAL_SERVER_ERROR);
   }
-
 
 }
