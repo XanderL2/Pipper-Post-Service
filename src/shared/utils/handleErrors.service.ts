@@ -20,10 +20,12 @@ const prismaDbErrors = {
 @Injectable()
 export class ErrorUUtilsService {
   handleDBPrismError(error: any, entity: string) {
+
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       console.error(`Error ${error.code} in ${entity}: ${error.message}`);
 
       const handleError = prismaDbErrors[error.code] || prismaDbErrors['DEFAULT'];
+
       return handleError(entity);
     }
 

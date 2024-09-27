@@ -1,8 +1,10 @@
+import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingId.pipe';
 import {
   Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe,
   ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags,
-  PostsService, CreatePostDto, UpdatePostDto, isValidId, ValidationUtilsService
+  PostsService, CreatePostDto, UpdatePostDto, isValidMongoIdPipe, ValidationUtilsService
 } from './imports';  
+
 
 
 @ApiTags('Posts')
@@ -85,7 +87,7 @@ export class PostsController {
   @ApiResponse({ status: 200, description: 'Posts fetched successfully' })
   @ApiParam({ name: 'postId', type: String, description: 'Post ID', required: true })
   @Get(':postId')
-  async onePostById(@Param('postId', isValidId) postId: string) {
+  async onePostById(@Param('postId', isValidMongoIdPipe) postId: string) {
     return { results: await this.postsSvc.findOnePost(postId) };
   }
 
@@ -96,8 +98,10 @@ export class PostsController {
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   @ApiResponse({ status: 200, description: 'Posts updated successfully' })
   @ApiParam({ name: 'postId', type: String, description: 'Post ID', required: true })
-  @Patch(':id')
-  async updatePost(@Param('postId', isValidId) postId: string, @Body() data: UpdatePostDto) {
+  @Patch(':postId')
+  async updatePost(
+    @Param('postId', isValidMongoIdPipe, isAnExistingPostIdPipe) postId: string, @Body() data: UpdatePostDto
+  ) {
     return { results: await this.postsSvc.updatePost(postId, data) };
   }
 
@@ -108,7 +112,9 @@ export class PostsController {
   @ApiResponse({ status: 200, description: 'Posts deleted successfully' })
   @ApiParam({ name: 'postId', type: String, description: 'Post ID', required: true })
   @Delete(':postId')
-  async removePost(@Param('postId', isValidId) postId: string) {
+  async removePost(
+    @Param('postId', isValidMongoIdPipe, isAnExistingPostIdPipe) postId: string
+  ) {
     return this.postsSvc.deletePost(postId);
   }
 

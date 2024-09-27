@@ -3,9 +3,10 @@ import { ReactionsService } from './reactions.service';
 import { CreateReactionDto } from './dto/create-reaction.dto';
 import { PostReactions } from '@prisma/client';
 import { ValidationUtilsService } from 'src/shared/utils/validations.service';
-import { isValidId } from 'src/common/pipes/ValidateId..pipe';
+import { isValidMongoIdPipe} from 'src/common/pipes/ValidateId..pipe';
 import { UpdateReactionDto } from './dto/update-reaction.dto';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingId.pipe';
 
 
 
@@ -41,7 +42,7 @@ export class ReactionsController {
   @ApiParam({ name: 'postId', required: true, type: String, description: 'Post ID' })
   @Get(':postId')
   async findReactionsByPost(
-    @Param('postId', isValidId) postId: string,
+    @Param('postId', isValidMongoIdPipe, isAnExistingPostIdPipe) postId: string,
     @Query('page') page: string,
     @Query('limit',) limit: string,
   ) {
@@ -60,7 +61,7 @@ export class ReactionsController {
   @ApiParam({ name: 'reactionId', required: true, type: String, description: 'Reaction ID' })
   @Patch(':reactionId')
   async updateReaction(
-    @Param('reactionId', isValidId) reactionId: string,
+    @Param('reactionId', isValidMongoIdPipe) reactionId: string,
     @Body() body: UpdateReactionDto
   ) {
     return await this.reactionsService.updateReactionById(reactionId, body);
@@ -72,7 +73,7 @@ export class ReactionsController {
   @ApiResponse({ status: 200, description: 'Reaction deleted successfully' })
   @ApiParam({ name: 'reactionId', required: true, type: String, description: 'Reaction ID' })
   @Delete(':reactionId')
-  async remove(@Param('reactionId', isValidId) reactionId: string) {
+  async remove(@Param('reactionId', isValidMongoIdPipe) reactionId: string) {
     return await this.reactionsService.removeReactionById(reactionId);
   }
 

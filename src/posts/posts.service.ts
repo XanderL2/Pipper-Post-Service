@@ -134,7 +134,7 @@ export class PostsService {
       return results;
 
     } catch (error) {
-      throw this.errorUtilsService.handleDBPrismError(error, 'Reaction');
+      throw this.errorUtilsService.handleDBPrismError(error, 'Post');
     }
   }
 
