@@ -1,20 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { CreateReactionDto } from './dto/create-reaction.dto';
-import { UpdateReactionDto } from './dto/update-reaction.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PostReactions } from '@prisma/client';
+import { ErrorUUtilsService } from '../shared/utils/handleErrors.service';
+import { UpdateReactionDto } from './dto/update-reaction.dto';
+
 
 @Injectable()
 export class ReactionsService {
 
-  constructor(private readonly prismaService: PrismaService) {}
-
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly errorUtilsService: ErrorUUtilsService
+  ) { }
 
 
   async createReaction(data: CreateReactionDto) {
 
-    try{
- 
+    try {
+
       const results: PostReactions = await this.prismaService.postReactions.create(
         {
           data: {
@@ -22,36 +26,71 @@ export class ReactionsService {
             postId: data.postId,
             reaction: data.reaction,
           }
-        })
+        });
 
-        return results;
+      return results;
 
-    }catch(error){
-      console.log(error)
-
-
-
+    } catch (error) {
+      throw await this.errorUtilsService.handleDBPrismError(error, 'Reaction');
     }
-
-
   }
 
-  findAllReactions() {
-    return `This action returns all reactions`;
+
+  async fetchReactionsByPost(postId: string, page: number, limit: number) {
+
+    try {
+
+      const offset: number = (page - 1) * limit;
+
+      const results = await this.prismaService.postReactions.findMany({
+        where: { postId: postId },
+        orderBy: { createdAt: 'desc' },
+        skip: offset,
+        take: limit
+      });
+
+      return results;
+
+    } catch (error) {
+      throw this.errorUtilsService.handleDBPrismError(error, 'Reaction');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} reaction`;
+  async updateReactionById(reactionId: string, data: UpdateReactionDto) {
+
+    try {
+
+      const updatedReactionResults = await this.prismaService.postReactions.update({
+        where: {
+          id: reactionId
+        },
+        data: {
+          reaction: data.reaction,
+        },
+      });
+
+      return updatedReactionResults;
+
+    } catch (error) {
+      throw this.errorUtilsService.handleDBPrismError(error, 'Reaction');
+    }
   }
 
-  update(id: number, updateReactionDto: UpdateReactionDto) {
-    return `This action updates a #${id} reaction`;
+
+  async removeReactionById(reactionId: string) {
+    try {
+      const results = await this.prismaService.postReactions.delete({
+        where: {
+          id: reactionId,
+        }
+      });
+
+      return results;
+
+    } catch (error) {
+      throw this.errorUtilsService.handleDBPrismError(error, 'Reaction');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} reaction`;
-  }
-
-  
 
 }

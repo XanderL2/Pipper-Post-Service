@@ -26,8 +26,6 @@ export class ValidationUtilsService {
             }
         });
 
-        console.log(results);
-
         return results ? true: false;
     }
 

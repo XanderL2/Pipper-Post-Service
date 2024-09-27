@@ -27,7 +27,7 @@ export class ErrorUUtilsService {
       return handleError(entity);
     }
 
+
     throw new HttpException('Unknown database error', HttpStatus.INTERNAL_SERVER_ERROR);
   }
-
 }
