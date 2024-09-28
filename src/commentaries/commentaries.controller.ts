@@ -3,24 +3,32 @@ import { CommentariesService } from './commentaries.service';
 import { CreateCommentaryDto } from './dto/create-commentary.dto';
 import { UpdateCommentaryDto } from './dto/update-commentary.dto';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, isValidMongoIdPipe, ValidationUtilsService } from 'src/posts/imports';
-import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingId.pipe';
+import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingPostId.pipe';
 
 
 @ApiTags('Commentaries')
 @Controller('commentaries')
 export class CommentariesController {
-  constructor(private readonly commentariesService: CommentariesService, private readonly validations: ValidationUtilsService) {}
+  constructor(
+    private readonly commentariesService: CommentariesService, 
+    private readonly validations: ValidationUtilsService,
+    private readonly validationService: ValidationUtilsService 
+  ) {}
 
 
   //!  POST ID DE PRUEBA          66f05a07a7fd7c8bfcb74d77   
-
   @ApiOperation({ summary: 'Create a new commentary' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   @ApiResponse({ status: 200, description: 'Commentary created successfully' })
   @Post()
-  async create(@Body() createCommentaryDto: CreateCommentaryDto) {
-    return await this.commentariesService.createCommentary(createCommentaryDto);
+  async create(@Body() body: CreateCommentaryDto) {
+
+    if(! await this.validationService.isAnExistingPostId(body.postId)){
+      throw new HttpException('PostId is not found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.commentariesService.createCommentary(body);
   }
 
  

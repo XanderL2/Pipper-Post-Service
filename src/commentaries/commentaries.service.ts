@@ -10,7 +10,7 @@ export class CommentariesService {
 
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly errorUtilsService: ErrorUUtilsService
+    private readonly errorUtilsService: ErrorUUtilsService,
   ) {
     this.prismaService = prismaService;
     this.errorUtilsService = errorUtilsService;
@@ -20,7 +20,6 @@ export class CommentariesService {
   async createCommentary(body: CreateCommentaryDto) {
 
     try {
-
       const response = await this.prismaService.commentary.create({
         data: {
           ...body
@@ -56,6 +55,7 @@ export class CommentariesService {
   }
 
   async updateCommentaryById(commentaryId: string, body: UpdateCommentaryDto) {
+
 
     try {
 

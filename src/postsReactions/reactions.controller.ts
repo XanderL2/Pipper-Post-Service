@@ -6,7 +6,7 @@ import { ValidationUtilsService } from 'src/shared/utils/validations.service';
 import { isValidMongoIdPipe} from 'src/common/pipes/ValidateId..pipe';
 import { UpdateReactionDto } from './dto/update-reaction.dto';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingId.pipe';
+import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingPostId.pipe';
 
 
 

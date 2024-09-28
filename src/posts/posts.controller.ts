@@ -1,4 +1,4 @@
-import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingId.pipe';
+import { isAnExistingPostIdPipe } from 'src/common/pipes/isAnExistingPostId.pipe';
 import {
   Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe,
   ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags,

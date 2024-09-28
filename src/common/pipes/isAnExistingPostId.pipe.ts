@@ -1,21 +1,20 @@
 import { ArgumentMetadata, HttpException, HttpStatus, Injectable, PipeTransform } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { ValidationUtilsService } from 'src/posts/imports';
 
 @Injectable()
 export class isAnExistingPostIdPipe implements PipeTransform {
 
-    constructor(private readonly prismaService: PrismaService){}
+    constructor(private readonly validationService: ValidationUtilsService){}
 
   async transform(value: string, metadata: ArgumentMetadata) {
 
-    const existingPost = await this.prismaService.post.findUnique({
-        where: {id: value}
-    });
 
+    const existingPost = await this.validationService.isAnExistingPostId(value);
 
     if(!existingPost) throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
 
     return value;
+
   }
 }
 

@@ -1,4 +1,5 @@
-// This is your Prisma schema file, // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is your Prisma schema file, 
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
@@ -19,8 +20,8 @@ model Post {
   createdAt DateTime @default(now())
 
   //? Related to: 
-  PostReactions PostReactions[]
-  Commentary    Commentary[]
+  postReactions PostReactions[]
+  commentary    Commentary[]
 }
 
 model PostReactions {
@@ -44,11 +45,11 @@ model Commentary {
 
   //? Relations
   post               Post                 @relation(fields: [postId], references: [id])
-  ComentaryReactions ComentaryReactions[]
-  Replies            Replies[]
+  commentaryReactions CommentaryReactions[]
+  replies            Replies[]
 }
 
-model ComentaryReactions {
+model CommentaryReactions {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
   userId       Int
   reaction     ReactionsEnum
@@ -67,7 +68,7 @@ model Replies {
   commentaryId String   @db.ObjectId
 
   //? Relations
-  comentary Commentary @relation(fields: [commentaryId], references: [id])
+  commentary Commentary @relation(fields: [commentaryId], references: [id])
 }
 
 enum ReactionsEnum {

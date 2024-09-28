@@ -29,4 +29,17 @@ export class ValidationUtilsService {
         return results ? true: false;
     }
 
+
+    async isAnExistingCommentaryId(id: string){
+
+        const results = await this.prismaService.commentary.findUnique({
+            where: {
+                id: id
+            }
+        });
+
+        return results ? true: false;
+    }
+
 }
+

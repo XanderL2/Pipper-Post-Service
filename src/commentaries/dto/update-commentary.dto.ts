@@ -1,20 +1,19 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateCommentaryDto } from './create-commentary.dto';
-import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import {  IsInt, IsNotEmpty, IsString } from 'class-validator';
 
-export class UpdateCommentaryDto extends PartialType(CreateCommentaryDto) {
- 
+export class UpdateCommentaryDto {
+
     @ApiProperty({
-        description: 'Commentary Id',
-        example: '507f1f77bcf86cd799439011',
+        description: 'User Id',
+        example: '1',
         required: true,
-        type: String 
+        type: Number
     })
-    @IsString()
-    @IsMongoId()
+    @IsInt()
     @IsNotEmpty()
-    commentaryId: string;
+    userId: number;
  
+
     @ApiProperty({
         description: 'Commentary Content',
         example: 'This is a commentary',
